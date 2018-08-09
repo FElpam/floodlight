@@ -1,7 +1,8 @@
-package net.floodlightcontroller.maple.firstmodule;
+package net.floodlightcontroller.maple.restapitest;
 
 import net.floodlightcontroller.core.FloodlightContext;
 import net.floodlightcontroller.core.IFloodlightProviderService;
+import net.floodlightcontroller.core.IListener;
 import net.floodlightcontroller.core.IOFMessageListener;
 import net.floodlightcontroller.core.IOFSwitch;
 import net.floodlightcontroller.core.module.FloodlightModuleContext;
@@ -9,8 +10,14 @@ import net.floodlightcontroller.core.module.FloodlightModuleException;
 import net.floodlightcontroller.core.module.IFloodlightModule;
 import net.floodlightcontroller.core.module.IFloodlightService;
 import net.floodlightcontroller.restserver.IRestApiService;
+import net.floodlightcontroller.restserver.RestletRoutable;
+import net.floodlightcontroller.staticentry.web.StaticEntryPusherResource;
+import org.apache.commons.logging.LogFactory;
 import org.projectfloodlight.openflow.protocol.OFMessage;
 import org.projectfloodlight.openflow.protocol.OFType;
+import org.restlet.Context;
+import org.restlet.Restlet;
+import org.restlet.routing.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,19 +25,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-public class FirstModule implements IFloodlightModule, IOFMessageListener {
+public class RestApiProvider implements IFloodlightModule, IOFMessageListener, RestletRoutable{
     protected IFloodlightProviderService provider;
     protected static Logger logger;
-
+    protected IRestApiService iRestApiService;
     @Override
     public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
-        logger.info("~!@#$%^&*()_+|");
-        return Command.CONTINUE;
+        return null;
     }
 
     @Override
     public String getName() {
-        return FirstModule.class.getSimpleName();
+        return RestApiProvider.class.getSimpleName();
     }
 
     @Override
@@ -55,17 +61,16 @@ public class FirstModule implements IFloodlightModule, IOFMessageListener {
 
     @Override
     public Collection<Class<? extends IFloodlightService>> getModuleDependencies() {
-        Collection<Class<? extends IFloodlightService>> l =
-                new ArrayList<Class<? extends IFloodlightService>>();
+        Collection<Class<?extends IFloodlightService>> l = new ArrayList<>();
         l.add(IFloodlightProviderService.class);
-        l.add(IRestApiService.class);
         return l;
     }
+
     @Override
     public void init(FloodlightModuleContext context) throws FloodlightModuleException {
         provider = context.getServiceImpl(IFloodlightProviderService.class);
-
-        logger = LoggerFactory.getLogger(FirstModule.class);
+        iRestApiService = context.getServiceImpl(IRestApiService.class);
+        logger = LoggerFactory.getLogger(RestApiProvider.class);
     }
 
     @Override
@@ -73,7 +78,15 @@ public class FirstModule implements IFloodlightModule, IOFMessageListener {
         provider.addOFMessageListener(OFType.PACKET_IN,this);
     }
 
+    @Override
+    public Restlet getRestlet(Context context) {
+        Router router = new Router(context);
+        router.attach("/json", SwitchResource.class);
+        return router;
+    }
 
-
-
+    @Override
+    public String basePath() {
+        return "/maple/staticentrypusher";
+    }
 }

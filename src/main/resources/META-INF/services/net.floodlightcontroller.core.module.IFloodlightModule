@@ -1,4 +1,5 @@
-net.floodlightcontroller.maple.firstmodule.FirstModule
+net.floodlightcontroller.maple.networkversioncontroller.VersionInfoCollector
+net.floodlightcontroller.maple.pktprocesser.PktProcesser
 net.floodlightcontroller.core.internal.FloodlightProvider
 net.floodlightcontroller.storage.memory.MemoryStorageSource
 net.floodlightcontroller.flowcache.FlowReconcileManager
